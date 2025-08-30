@@ -877,19 +877,20 @@
         });
 
         // ARGO Float Data with cycle counts and quality data
+        // ARGO Float Data with cycle counts and quality data - corrected ocean positions
         const argoData = [
-            {id: '198475', lat: 18.5, lng: 71.2, temp: 28.7, salinity: 34.3, location: 'Arabian Sea - Mumbai Offshore', date: '2024-08-29', cycles: 156, quality: 'Good', wmoid: '1902411'},
-            {id: '2902201', lat: 12.8, lng: 81.5, temp: 29.2, salinity: 34.9, location: 'Bay of Bengal - Chennai Offshore', date: '2024-08-29', cycles: 134, quality: 'Excellent', wmoid: '2902201'},
-            {id: '2902272', lat: 7.5, lng: 75.8, temp: 27.9, salinity: 34.0, location: 'Arabian Sea - Kerala Offshore', date: '2024-08-29', cycles: 189, quality: 'Good', wmoid: '2902272'},
-            {id: '2902286', lat: 14.2, lng: 73.1, temp: 28.8, salinity: 34.5, location: 'Arabian Sea - Goa Offshore', date: '2024-08-29', cycles: 167, quality: 'Good', wmoid: '2902286'},
-            {id: '2902292', lat: 16.8, lng: 82.9, temp: 29.4, salinity: 35.2, location: 'Bay of Bengal - Vizag Offshore', date: '2024-08-29', cycles: 145, quality: 'Excellent', wmoid: '2902292'},
-            {id: 'AR_006', lat: 11.2, lng: 78.5, temp: 28.5, salinity: 34.2, location: 'Bay of Bengal - Puducherry Offshore', date: '2024-08-29', cycles: 178, quality: 'Good', wmoid: 'AR_006'},
-            {id: 'AR_007', lat: 9.1, lng: 74.9, temp: 27.7, salinity: 33.9, location: 'Arabian Sea - Kochi Offshore', date: '2024-08-29', cycles: 123, quality: 'Fair', wmoid: 'AR_007'},
-            {id: 'AR_008', lat: 20.5, lng: 71.8, temp: 28.3, salinity: 34.4, location: 'Arabian Sea - Gujarat Offshore', date: '2024-08-29', cycles: 198, quality: 'Excellent', wmoid: 'AR_008'},
-            {id: 'AR_009', lat: 13.5, lng: 74.2, temp: 28.0, salinity: 34.1, location: 'Arabian Sea - Karnataka Offshore', date: '2024-08-29', cycles: 112, quality: 'Good', wmoid: 'AR_009'},
-            {id: 'AR_010', lat: 15.8, lng: 81.3, temp: 29.1, salinity: 34.8, location: 'Bay of Bengal - AP Coast Offshore', date: '2024-08-29', cycles: 156, quality: 'Good', wmoid: 'AR_010'},
-            {id: 'AR_011', lat: 10.2, lng: 78.9, temp: 28.6, salinity: 34.4, location: 'Bay of Bengal - TN South Offshore', date: '2024-08-29', cycles: 134, quality: 'Excellent', wmoid: 'AR_011'},
-            {id: 'AR_012', lat: 17.2, lng: 72.5, temp: 28.4, salinity: 34.6, location: 'Arabian Sea - Maharashtra Offshore', date: '2024-08-29', cycles: 189, quality: 'Good', wmoid: 'AR_012'},
+            {id: '198475', lat: 18.2, lng: 70.8, temp: 28.7, salinity: 34.3, location: 'Arabian Sea - Mumbai Offshore', date: '2024-08-29', cycles: 156, quality: 'Good', wmoid: '1902411'},
+            {id: '2902201', lat: 12.5, lng: 82.2, temp: 29.2, salinity: 34.9, location: 'Bay of Bengal - Chennai Offshore', date: '2024-08-29', cycles: 134, quality: 'Excellent', wmoid: '2902201'},
+            {id: '2902272', lat: 7.8, lng: 75.2, temp: 27.9, salinity: 34.0, location: 'Arabian Sea - Kerala Offshore', date: '2024-08-29', cycles: 189, quality: 'Good', wmoid: '2902272'},
+            {id: '2902286', lat: 14.8, lng: 72.5, temp: 28.8, salinity: 34.5, location: 'Arabian Sea - Goa Offshore', date: '2024-08-29', cycles: 167, quality: 'Good', wmoid: '2902286'},
+            {id: '2902292', lat: 16.2, lng: 83.8, temp: 29.4, salinity: 35.2, location: 'Bay of Bengal - Vizag Offshore', date: '2024-08-29', cycles: 145, quality: 'Excellent', wmoid: '2902292'},
+            {id: 'AR_006', lat: 11.5, lng: 79.8, temp: 28.5, salinity: 34.2, location: 'Bay of Bengal - Puducherry Offshore', date: '2024-08-29', cycles: 178, quality: 'Good', wmoid: 'AR_006'},
+            {id: 'AR_007', lat: 9.5, lng: 75.8, temp: 27.7, salinity: 33.9, location: 'Arabian Sea - Kochi Offshore', date: '2024-08-29', cycles: 123, quality: 'Fair', wmoid: 'AR_007'},
+            {id: 'AR_008', lat: 20.8, lng: 70.2, temp: 28.3, salinity: 34.4, location: 'Arabian Sea - Gujarat Offshore', date: '2024-08-29', cycles: 198, quality: 'Excellent', wmoid: 'AR_008'},
+            {id: 'AR_009', lat: 13.2, lng: 73.8, temp: 28.0, salinity: 34.1, location: 'Arabian Sea - Karnataka Offshore', date: '2024-08-29', cycles: 112, quality: 'Good', wmoid: 'AR_009'},
+            {id: 'AR_010', lat: 15.2, lng: 82.5, temp: 29.1, salinity: 34.8, location: 'Bay of Bengal - AP Coast Offshore', date: '2024-08-29', cycles: 156, quality: 'Good', wmoid: 'AR_010'},
+            {id: 'AR_011', lat: 9.8, lng: 79.5, temp: 28.6, salinity: 34.4, location: 'Bay of Bengal - TN South Offshore', date: '2024-08-29', cycles: 134, quality: 'Excellent', wmoid: 'AR_011'},
+            {id: 'AR_012', lat: 17.5, lng: 71.8, temp: 28.4, salinity: 34.6, location: 'Arabian Sea - Maharashtra Offshore', date: '2024-08-29', cycles: 189, quality: 'Good', wmoid: 'AR_012'},
         ];
 
         // Sample data for Float 198475 (based on the provided ARGO data structure)
