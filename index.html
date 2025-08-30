@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FloatChat - ARGO Ocean Intelligence</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .logo i {
+            color: #0ea5e9;
+            font-size: 1.5rem;
+        }
+
+        .tagline {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            height: calc(100vh - 90px);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .map-section {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .map-header {
+            background: #f1f5f9;
+            padding: 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .map-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0ea5e9;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        #map {
+            height: calc(100% - 140px);
+            width: 100%;
+        }
+
+        .chat-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-header {
+            background: #f1f5f9;
+            padding: 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .chat-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .tools-section {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #475569;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .tool-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .tool-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .query-section {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .query-section h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .question-category {
+            margin-bottom: 1rem;
+        }
+
+        .category-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .quick-question {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            color: #334155;
+        }
+
+        .quick-question:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+            transform: translateX(2px);
+        }
+
+        .random-query-section {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #fafbfc;
+        }
+
+        .random-query-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .random-query-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.25rem;
+            overflow-y: auto;
+            background: #f8fafc;
+            min-height: 300px;
+            max-height: calc(100vh - 500px);
+        }
+
+        .message {
+            margin-bottom: 1.25rem;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 4px rgba(59,130,246,0.2);
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .typing-indicator {
+            display: none;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #64748b;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .chat-input-section {
+            padding: 1.25rem;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: white;
+            color: #1e293b;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .chat-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .send-btn {
+            background: #3b82f6;
+            border: none;
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .feature-highlight {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 0.875rem;
+            margin: 0.75rem 0;
+            border-radius: 0 8px 8px 0;
+            color: #1e40af;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            width: 85%;
+            max-width: 900px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            background: #f1f5f9;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: calc(90vh - 100px);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0.25rem;
+        }
+
+        .close-btn:hover {
+            color: #1e293b;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1rem 0;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .control-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .control-group select, .control-group input {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+        }
+
+        .profile-modal-content {
+            background: white;
+            margin: 2% auto;
+            width: 85%;
+            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .profile-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .profile-tab.active {
+            background: white;
+            color: #0f172a;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .info-section {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .status-active {
+            color: #10b981;
+            background: #d1fae5;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 350px 1fr;
+                gap: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tools-section {
+                justify-content: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-messages {
+                max-height: calc(100vh - 400px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-water"></i>
+                <div>
+                    <h1>FloatChat</h1>
+                    <p class="tagline">ARGO Ocean Intelligence Platform</p>
+                </div>
+            </div>
+            <div style="text-align: right; font-size: 0.875rem; color: #64748b;">
+                <div><strong>Live Data</strong></div>
+                <div>Indian Ocean Region</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="map-section">
+            <div class="map-header">
+                <h2><i class="fas fa-satellite"></i> Active ARGO Floats - Indian Ocean</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">52</div>
+                        <div class="stat-label">Active Floats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">847</div>
+                        <div class="stat-label">New Profiles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">134</div>
+                        <div class="stat-label">Avg Cycle Count</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">98.5%</div>
+                        <div class="stat-label">Data Quality</div>
+                    </div>
+                </div>
+            </div>
+            <div id="map"></div>
+        </div>
+
+        <div class="chat-section">
+            <div class="chat-header">
+                <h2><i class="fas fa-brain"></i> Ocean Data Assistant</h2>
+                <p>Advanced queries for ARGO float data analysis and oceanographic insights</p>
+            </div>
+
+            <div class="tools-section">
+                <div class="tool-btn" onclick="toggleVisualization()">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Visualize Data</span>
+                </div>
+                <div class="tool-btn" onclick="showFloatSelector()">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Float Profiles</span>
+                </div>
+                <div class="tool-btn" onclick="showAnalysisTools()">
+                    <i class="fas fa-calculator"></i>
+                    <span>Analysis</span>
+                </div>
+            </div>
+
+            <div class="query-section">
+                <h4>Quick Queries</h4>
+                <div class="question-category">
+                    <div class="category-title">Basic Data Queries</div>
+                    <div class="quick-question" onclick="askQuestion('What is the temperature at 500m depth for float 2902201?')">
+                        Temperature at 500m for float 2902201?
+                    </div>
+                    <div class="quick-question" onclick="askQuestion('Show salinity at surface for float 198475')">
+                        Surface salinity for float 198475
+                    </div>
+                    <div class="quick-question" onclick="askQuestion('Maximum depth reached by float 2902272?')">
+                        Maximum depth for float 2902272
+                    </div>
+                </div>
+
+                <div class="question-category">
+                    <div class="category-title">Scientific Analysis</div>
+                    <div class="quick-question" onclick="askQuestion('Evidence of surface warming in Arabian Sea?')">
+                        Surface warming evidence in Arabian Sea
+                    </div>
+                    <div class="quick-question" onclick="askQuestion('Estimate mixed layer depth for float 2902201')">
+                        Mixed layer depth estimation
+                    </div>
+                    <div class="quick-question" onclick="askQuestion('Compare temperature profiles Arabian Sea vs Bay of Bengal')">
+                        Arabian Sea vs Bay of Bengal comparison
+                    </div>
+                </div>
+            </div>
+
+            <div class="random-query-section">
+                <button class="random-query-btn" onclick="generateRandomQuery()">
+                    <i class="fas fa-random"></i>
+                    Generate Random Query
+                </button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-content">
+                        <strong>Welcome to FloatChat ARGO Intelligence!</strong><br><br>
+                        I provide advanced oceanographic analysis for Indian Ocean ARGO float data. I can help with:
+                        <div class="feature-highlight">
+                            <strong>Data Analysis:</strong> Temperature, salinity, pressure profiles<br>
+                            <strong>Visualizations:</strong> T-S diagrams, depth profiles, trend analysis<br>
+                            <strong>Queries:</strong> Spatio-temporal analysis, comparative studies<br>
+                            <strong>Science:</strong> Mixed layer depth, seasonal cycles, warming trends
+                        </div>
+                        Select a query category above or ask me directly about ocean data!
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-content">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-section">
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="Ask about ARGO data, oceanographic analysis, or visualization..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization Modal -->
+    <div class="modal" id="visualizationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-line"></i> ARGO Float Data Visualization</h3>
+                <button class="close-btn" onclick="closeVisualization()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="chart-controls">
+                    <div class="control-group">
+                        <label>Float ID</label>
+                        <select id="floatSelect" onchange="updateVisualization()">
+                            <option value="198475">Float 198475</option>
+                            <option value="2902201">Float 2902201</option>
+                            <option value="2902272">Float 2902272</option>
+                            <option value="2902286">Float 2902286</option>
+                            <option value="2902292">Float 2902292</option>
+                            <option value="AR_006">Float AR_006</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Chart Type</label>
+                        <select id="chartType" onchange="updateVisualization()">
+                            <option value="temp_depth">Temperature vs Depth</option>
+                            <option value="sal_depth">Salinity vs Depth</option>
+                            <option value="temp_sal">T-S Diagram</option>
+                            <option value="time_series">Time Series</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Date Range</label>
+                        <select id="dateRange" onchange="updateVisualization()">
+                            <option value="latest">Latest Profile</option>
+                            <option value="month">Last Month</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="dataChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Float Profile Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-modal-content">
+            <div class="profile-header">
+                <h2 id="profileTitle">Float Profile</h2>
+                <button class="close-btn" onclick="closeProfile()" style="color: white;">&times;</button>
+            </div>
+            <div class="profile-tabs">
+                <button class="profile-tab active" onclick="showProfileTab('main', event)">Main Information</button>
+                <button class="profile-tab" onclick="showProfileTab('technical', event)">Technical Plots</button>
+                <button class="profile-tab" onclick="showProfileTab('trajectory', event)">Trajectory Data</button>
+            </div>
+            <div class="profile-content" id="profileContent">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Create custom ARGO float icon
+        const floatIconSVG = `data:image/svg+xml;base64,${btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 60" width="20" height="30">
+                <defs>
+                    <linearGradient id="floatGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#FF6B35;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <circle cx="20" cy="15" r="8" fill="url(#floatGrad)" stroke="#333" stroke-width="1"/>
+                <rect x="18" y="23" width="4" height="25" fill="#666"/>
+                <rect x="16" y="48" width="8" height="8" fill="#333" rx="2"/>
+                <circle cx="20" cy="15" r="3" fill="#fff" opacity="0.7"/>
+            </svg>
+        `)}`;
+
+        const floatIcon = L.icon({
+            iconUrl: floatIconSVG,
+            iconSize: [20, 30],
+            iconAnchor: [10, 15],
+            popupAnchor: [0, -15]
+        });
+
+        // ARGO Float Data with cycle counts and quality data
+        const argoData = [
+            {id: '198475', lat: 18.5, lng: 71.2, temp: 28.7, salinity: 34.3, location: 'Arabian Sea - Mumbai Offshore', date: '2024-08-29', cycles: 156, quality: 'Good', wmoid: '1902411'},
+            {id: '2902201', lat: 12.8, lng: 81.5, temp: 29.2, salinity: 34.9, location: 'Bay of Bengal - Chennai Offshore', date: '2024-08-29', cycles: 134, quality: 'Excellent', wmoid: '2902201'},
+            {id: '2902272', lat: 7.5, lng: 75.8, temp: 27.9, salinity: 34.0, location: 'Arabian Sea - Kerala Offshore', date: '2024-08-29', cycles: 189, quality: 'Good', wmoid: '2902272'},
+            {id: '2902286', lat: 14.2, lng: 73.1, temp: 28.8, salinity: 34.5, location: 'Arabian Sea - Goa Offshore', date: '2024-08-29', cycles: 167, quality: 'Good', wmoid: '2902286'},
+            {id: '2902292', lat: 16.8, lng: 82.9, temp: 29.4, salinity: 35.2, location: 'Bay of Bengal - Vizag Offshore', date: '2024-08-29', cycles: 145, quality: 'Excellent', wmoid: '2902292'},
+            {id: 'AR_006', lat: 11.2, lng: 78.5, temp: 28.5, salinity: 34.2, location: 'Bay of Bengal - Puducherry Offshore', date: '2024-08-29', cycles: 178, quality: 'Good', wmoid: 'AR_006'},
+            {id: 'AR_007', lat: 9.1, lng: 74.9, temp: 27.7, salinity: 33.9, location: 'Arabian Sea - Kochi Offshore', date: '2024-08-29', cycles: 123, quality: 'Fair', wmoid: 'AR_007'},
+            {id: 'AR_008', lat: 20.5, lng: 71.8, temp: 28.3, salinity: 34.4, location: 'Arabian Sea - Gujarat Offshore', date: '2024-08-29', cycles: 198, quality: 'Excellent', wmoid: 'AR_008'},
+            {id: 'AR_009', lat: 13.5, lng: 74.2, temp: 28.0, salinity: 34.1, location: 'Arabian Sea - Karnataka Offshore', date: '2024-08-29', cycles: 112, quality: 'Good', wmoid: 'AR_009'},
+            {id: 'AR_010', lat: 15.8, lng: 81.3, temp: 29.1, salinity: 34.8, location: 'Bay of Bengal - AP Coast Offshore', date: '2024-08-29', cycles: 156, quality: 'Good', wmoid: 'AR_010'},
+            {id: 'AR_011', lat: 10.2, lng: 78.9, temp: 28.6, salinity: 34.4, location: 'Bay of Bengal - TN South Offshore', date: '2024-08-29', cycles: 134, quality: 'Excellent', wmoid: 'AR_011'},
+            {id: 'AR_012', lat: 17.2, lng: 72.5, temp: 28.4, salinity: 34.6, location: 'Arabian Sea - Maharashtra Offshore', date: '2024-08-29', cycles: 189, quality: 'Good', wmoid: 'AR_012'},
+        ];
+
+        // Sample data for Float 198475 (based on the provided ARGO data structure)
+        const float198475Data = {
+            depths: [4.6, 10, 15, 20.1, 24.9, 28.3, 35.6, 40.2, 45.5, 50.6, 59.9, 69.8, 80.2, 90.3, 100.5, 110.3, 119.9, 130.7, 140.2, 150.6, 159.9, 169.9, 180.6, 190.5, 200.8, 220.4, 238.4, 260.3, 279.9, 299.5, 329.9, 360, 400.6, 450.3, 500.4, 548.2, 599.8, 650.4, 700.6, 750.1, 800.2, 850.5, 900.4, 949.8, 1000.2, 1050.3, 1100.5, 1150.2, 1200.3, 1250.3, 1300.4, 1349.9, 1400.4, 1500, 1600.5, 1700, 1799.7, 1900.4, 2000],
+            temperatures: [27.48, 27.25, 27.22, 26.88, 26.55, 26.28, 25.94, 25.66, 25.38, 24.99, 24.70, 23.47, 22.92, 22.19, 21.94, 21.18, 20.89, 20.59, 19.75, 18.88, 18.79, 18.50, 18.20, 17.69, 17.20, 15.77, 15.49, 15.72, 15.44, 15.34, 14.82, 14.18, 13.36, 12.98, 12.50, 12.08, 11.74, 11.31, 10.88, 10.53, 10.16, 9.74, 9.23, 8.88, 8.61, 8.15, 7.87, 7.52, 7.26, 6.93, 6.65, 6.44, 6.17, 5.55, 4.97, 4.39, 3.81, 3.44, 3.19],
+            salinities: [36.59, 36.58, 36.57, 36.56, 36.55, 36.54, 36.53, 36.53, 36.49, 36.41, 36.42, 36.15, 36.09, 36.01, 36.05, 35.94, 35.97, 36.01, 35.93, 35.78, 35.81, 35.81, 35.85, 35.81, 35.88, 35.64, 35.68, 35.81, 35.92, 35.95, 35.93, 35.86, 35.73, 35.71, 35.65, 35.63, 35.61, 35.56, 35.51, 35.49, 35.46, 35.42, 35.36, 35.32, 35.31, 35.25, 35.23, 35.20, 35.17, 35.14, 35.12, 35.10, 35.04, 34.97, 34.91, 34.86, 34.83, 34.81]
+        };
+
+        // Random queries array
+        const randomQueries = [
+            'What is the deepest measurement recorded by any float in the Arabian Sea?',
+            'Show me the temperature gradient between 100m and 500m for Bay of Bengal floats',
+            'Which float has the most consistent salinity measurements?',
+            'Calculate the thermocline depth for float 2902201',
+            'Compare oxygen levels between Arabian Sea and Bay of Bengal',
+            'What seasonal patterns exist in the mixed layer depth?',
+            'Show water mass characteristics for the Indian Ocean region',
+            'Identify any anomalous temperature readings in the last 6 months',
+            'Plot density stratification for the southern Indian Ocean',
+            'Analysis of upwelling indicators near the Indian coast'
+        ];
+
+        // AI Response Database
+        const responses = {
+            '198475': {
+                text: '<strong>Float 198475 Analysis</strong><br>Location: Arabian Sea - Mumbai Offshore<br>Surface Temperature: 27.48°C<br>Surface Salinity: 36.59‰<br>Profile Depth: 0-2000m<br><br><strong>Key Observations:</strong><br>• Strong thermocline at ~100m<br>• High surface salinity typical of Arabian Sea<br>• Deep water temperature: 3.19°C at 2000m<br><em>Click Visualize Data to see detailed charts</em>',
+                floatId: '198475'
+            },
+            'temperature 500m 2902201': {
+                text: '<strong>Temperature at 500m - Float 2902201</strong><br>Temperature: <strong>12.5°C</strong><br>Location: Bay of Bengal<br>Exact depth: 500.4m<br>Last measurement: Aug 29, 2024<br><br>This represents typical deep water temperature in the Bay of Bengal thermocline region.',
+                floatId: '2902201'
+            },
+            'arabian sea warming': {
+                text: '<strong>Arabian Sea Surface Warming Analysis</strong><br><br><strong>Evidence Found:</strong><br>• 0.8°C increase since 2020<br>• Peak warming in pre-monsoon months<br>• Strongest signal in northern Arabian Sea<br><br><strong>Data Sources:</strong> 15 ARGO floats<br><strong>Confidence:</strong> High (>95%)<br><em>Consistent with global ocean warming patterns</em>',
+                floatId: null
+            },
+            'mixed layer depth': {
+                text: '<strong>Mixed Layer Depth - Float 2902201</strong><br><br><strong>Current MLD:</strong> 32 ± 3 meters<br><strong>Criteria:</strong> 0.5°C temperature difference<br><strong>Seasonal variation:</strong> 15-45m<br><br><strong>Physical Interpretation:</strong><br>• Shallow summer mixed layer<br>• Deep winter mixing due to cooling<br>• Influenced by monsoon dynamics',
+                floatId: '2902201'
+            },
+            'compare arabian bay bengal': {
+                text: '<strong>Arabian Sea vs Bay of Bengal Comparison</strong><br><br><strong>Temperature:</strong><br>• Arabian Sea: Warmer surface (28.5°C avg)<br>• Bay of Bengal: Moderate surface (28.1°C avg)<br><br><strong>Salinity:</strong><br>• Arabian Sea: Higher (34.8‰ avg)<br>• Bay of Bengal: Lower (33.9‰ - river influence)<br><br>Based on 2022-2024 ARGO data from 28 floats',
+                floatId: null
+            },
+            'default': {
+                text: 'I can help you analyze ARGO float data for the Indian Ocean region. Here are some capabilities:<br><br><strong>Available Analysis:</strong><br>• Temperature and salinity profiles<br>• Depth-based measurements<br>• Temporal trend analysis<br>• Comparative studies between regions<br>• Scientific oceanographic calculations<br><br>Try asking specific questions about floats, measurements, or use the visualization tools above!'
+            }
+        };
+
+        // Initialize Map
+        let map;
+        let markers = [];
+        let currentChart = null;
+        let currentFloatData = null;
+
+        function initMap() {
+            map = L.map('map').setView([13.0, 77.0], 5);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add ARGO float markers with custom icons
+            argoData.forEach(float => {
+                const marker = L.marker([float.lat, float.lng], {icon: floatIcon})
+                    .addTo(map)
+                    .on('mouseover', function() {
+                        this.bindTooltip(`Float ${float.id}<br>Cycles: ${float.cycles}`, {
+                            permanent: false,
+                            direction: 'top',
+                            className: 'float-tooltip'
+                        }).openTooltip();
+                    })
+                    .on('click', function() {
+                        openFloatProfile(float);
+                    });
+                
+                markers.push({marker: marker, id: float.id, data: float});
+            });
+        }
+
+        // Float Profile Functions
+        function openFloatProfile(floatData) {
+            currentFloatData = floatData;
+            document.getElementById('profileTitle').innerHTML = `Float ${floatData.id}`;
+            showProfileTab('main');
+            document.getElementById('profileModal').style.display = 'block';
+            
+            // Load main information
+            loadMainInformation(floatData);
+        }
+
+        function closeProfile() {
+            document.getElementById('profileModal').style.display = 'none';
+            currentFloatData = null;
+        }
+
+        function showProfileTab(tabName, event = null) {
+            // Update tab appearance
+            document.querySelectorAll('.profile-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                document.querySelector('.profile-tab').classList.add('active');
+            }
+            
+            // Load content based on tab
+            const content = document.getElementById('profileContent');
+            switch(tabName) {
+                case 'main':
+                    if (currentFloatData) loadMainInformation(currentFloatData);
+                    break;
+                case 'technical':
+                    loadTechnicalPlots();
+                    break;
+                case 'trajectory':
+                    loadTrajectoryData();
+                    break;
+            }
+        }
+
+        function loadMainInformation(floatData) {
+            const content = document.getElementById('profileContent');
+            const cycleRange = `${Math.max(10, floatData.cycles - 20)}-${floatData.cycles}`;
+            
+            content.innerHTML = `
+                <div class="info-grid">
+                    <div class="info-section">
+                        <h4><i class="fas fa-info-circle"></i> About Float</h4>
+                        <div class="info-row">
+                            <span class="info-label">WMO ID</span>
+                            <span class="info-value">${floatData.wmoid}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Platform Type</span>
+                            <span class="info-value">APEX</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Float Serial</span>
+                            <span class="info-value">${Math.floor(Math.random() * 9000) + 1000}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Transmission System</span>
+                            <span class="info-value">IRIDIUM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4><i class="fas fa-rocket"></i> Deployment</h4>
+                        <div class="info-row">
+                            <span class="info-label">Launched</span>
+                            <span class="info-value">3 years ago</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Deployment Latitude</span>
+                            <span class="info-value">${floatData.lat.toFixed(4)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Deployment Longitude</span>
+                            <span class="info-value">${floatData.lng.toFixed(4)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ship</span>
+                            <span class="info-value">RV Investigator</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4><i class="fas fa-chart-line"></i> Cycle Activity</h4>
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span class="info-value status-active">Active</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Age</span>
+                            <span class="info-value">3.${Math.floor(Math.random() * 99)} years old</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Last Profile Date</span>
+                            <span class="info-value">${floatData.date}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Cycle Count Range</span>
+                            <span class="info-value">${cycleRange}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Data Quality</span>
+                            <span class="info-value">${floatData.quality}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4><i class="fas fa-thermometer-half"></i> Latest Data</h4>
+                        <div class="info-row">
+                            <span class="info-label">Surface Temperature</span>
+                            <span class="info-value">${floatData.temp}°C</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Surface Salinity</span>
+                            <span class="info-value">${floatData.salinity}‰</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Last Bottom Data</span>
+                            <span class="info-value">${(Math.random() * 500 + 1500).toFixed(1)}m depth</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Bottom Temperature</span>
+                            <span class="info-value">${(Math.random() * 2 + 2).toFixed(2)}°C</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadTechnicalPlots() {
+            const content = document.getElementById('profileContent');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h3>Technical Plots</h3>
+                    <p>Temperature and salinity profiles, T-S diagrams, and quality control plots would be displayed here.</p>
+                    <div style="margin: 2rem 0;">
+                        <button onclick="toggleVisualization()" style="padding: 1rem 2rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Open Visualization Tool
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadTrajectoryData() {
+            const content = document.getElementById('profileContent');
+            const floatId = document.getElementById('profileTitle').textContent.split(' ')[1];
+            const targetFloat = markers.find(m => m.id === floatId);
+            
+            content.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h3>Trajectory Data</h3>
+                    <p>Float trajectory maps and drift analysis would be displayed here.</p>
+                    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                        <strong>Current Position:</strong> ${targetFloat ? targetFloat.data.location : 'Unknown'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Random query generator
+        function generateRandomQuery() {
+            const randomQuery = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+            document.getElementById('chatInput').value = randomQuery;
+            sendMessage();
+        }
+
+        // Chat Functions
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = generateResponse(message);
+                addMessage(response.text, 'bot');
+                
+                if (response.floatId) {
+                    highlightFloat(response.floatId);
+                }
+            }, 1200);
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = text;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function generateResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('198475')) {
+                return responses['198475'];
+            }
+            if (lowerMessage.includes('temperature') && lowerMessage.includes('500') && lowerMessage.includes('2902201')) {
+                return responses['temperature 500m 2902201'];
+            }
+            if (lowerMessage.includes('warming') && lowerMessage.includes('arabian')) {
+                return responses['arabian sea warming'];
+            }
+            if (lowerMessage.includes('mixed layer') || lowerMessage.includes('mld')) {
+                return responses['mixed layer depth'];
+            }
+            if (lowerMessage.includes('compare') && (lowerMessage.includes('arabian') || lowerMessage.includes('bay'))) {
+                return responses['compare arabian bay bengal'];
+            }
+            if (lowerMessage.includes('plot') || lowerMessage.includes('visualize')) {
+                toggleVisualization();
+                return {
+                    text: '<strong>Opening Visualization Panel</strong><br><br>The data visualization tool is now open. You can:<br>• Select different floats and parameters<br>• Generate T-S diagrams<br>• Plot depth profiles<br>• Analyze time series data<br><br>Float data is available for all active floats.',
+                    floatId: null
+                };
+            }
+            
+            return responses['default'];
+        }
+
+        function highlightFloat(floatId) {
+            const targetMarker = markers.find(m => m.id === floatId);
+            if (targetMarker) {
+                targetMarker.marker.openPopup();
+                map.setView(targetMarker.marker.getLatLng(), 8);
+            }
+        }
+
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Visualization Functions
+        function toggleVisualization() {
+            document.getElementById('visualizationModal').style.display = 'block';
+            updateVisualization();
+        }
+
+        function closeVisualization() {
+            document.getElementById('visualizationModal').style.display = 'none';
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+        }
+
+        function showFloatSelector() {
+            addMessage('<strong>Available ARGO Floats:</strong><br><br><strong>Arabian Sea:</strong><br>• 198475 - Mumbai Offshore<br>• 2902272 - Kerala Offshore<br>• 2902286 - Goa Offshore<br><br><strong>Bay of Bengal:</strong><br>• 2902201 - Chennai Offshore<br>• 2902292 - Vizag Offshore<br>• AR_006 - Puducherry Offshore<br><br>Click on any float marker on the map for detailed profile information!', 'bot');
+        }
+
+        function showAnalysisTools() {
+            addMessage('<strong>Available Analysis Tools:</strong><br><br><strong>Profile Analysis:</strong><br>• Temperature vs Depth profiles<br>• Salinity vs Depth profiles<br>• Mixed layer depth calculation<br><br><strong>Trend Analysis:</strong><br>• Temporal temperature trends<br>• Seasonal cycle analysis<br>• Warming rate calculations<br><br><strong>Oceanographic Tools:</strong><br>• T-S diagram generation<br>• Water mass identification<br>• Density calculations', 'bot');
+        }
+
+        function updateVisualization() {
+            const floatId = document.getElementById('floatSelect').value;
+            const chartType = document.getElementById('chartType').value;
+            
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const ctx = document.getElementById('dataChart').getContext('2d');
+            
+            if (floatId === '198475') {
+                generateChart198475(ctx, chartType);
+            } else {
+                generateSampleChart(ctx, chartType, floatId);
+            }
+        }
+
+        function generateChart198475(ctx, chartType) {
+            const data = float198475Data;
+            let chartConfig = {};
+
+            switch(chartType) {
+                case 'temp_depth':
+                    chartConfig = {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                                label: 'Temperature (°C)',
+                                data: data.depths.map((depth, i) => ({
+                                    x: data.temperatures[i],
+                                    y: depth
+                                })),
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Temperature (°C)' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Depth (m)' },
+                                    reverse: true
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Temperature vs Depth Profile - Float 198475'
+                                }
+                            }
+                        }
+                    };
+                    break;
+                    
+                case 'sal_depth':
+                    chartConfig = {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                                label: 'Salinity (‰)',
+                                data: data.depths.map((depth, i) => ({
+                                    x: data.salinities[i],
+                                    y: depth
+                                })),
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Salinity (‰)' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Depth (m)' },
+                                    reverse: true
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Salinity vs Depth Profile - Float 198475'
+                                }
+                            }
+                        }
+                    };
+                    break;
+                    
+                case 'temp_sal':
+                    chartConfig = {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: 'T-S Relationship',
+                                data: data.temperatures.map((temp, i) => ({
+                                    x: data.salinities[i],
+                                    y: temp
+                                })),
+                                backgroundColor: '#10b981',
+                                borderColor: '#059669',
+                                pointRadius: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Salinity (‰)' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Temperature (°C)' }
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Temperature-Salinity Diagram - Float 198475'
+                                }
+                            }
+                        }
+                    };
+                    break;
+                    
+                case 'time_series':
+                    // Generate sample time series data
+                    const dates = [];
+                    const surfaceTemps = [];
+                    for (let i = 0; i < 30; i++) {
+                        const date = new Date();
+                        date.setDate(date.getDate() - i);
+                        dates.unshift(date.toISOString().split('T')[0]);
+                        surfaceTemps.unshift(27.5 + Math.sin(i * 0.2) * 0.8 + (Math.random() - 0.5) * 0.4);
+                    }
+                    
+                    chartConfig = {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [{
+                                label: 'Surface Temperature (°C)',
+                                data: surfaceTemps,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Date' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Temperature (°C)' }
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Surface Temperature Time Series - Float 198475'
+                                }
+                            }
+                        }
+                    };
+                    break;
+            }
+
+            currentChart = new Chart(ctx, chartConfig);
+        }
+
+        function generateSampleChart(ctx, chartType, floatId) {
+            // Generate sample data for other floats
+            const sampleDepths = [0, 10, 20, 50, 100, 200, 500, 1000, 1500, 2000];
+            const sampleTemps = [28.5, 28.2, 27.8, 26.5, 23.2, 18.5, 12.1, 8.5, 5.2, 3.1];
+            const sampleSalinities = [34.5, 34.6, 34.7, 34.8, 35.1, 35.3, 35.2, 35.0, 34.9, 34.8];
+
+            let chartConfig = {};
+
+            switch(chartType) {
+                case 'temp_depth':
+                    chartConfig = {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                                label: 'Temperature (°C)',
+                                data: sampleTemps.map((temp, i) => ({
+                                    x: temp,
+                                    y: sampleDepths[i]
+                                })),
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Temperature (°C)' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Depth (m)' },
+                                    reverse: true
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `Temperature vs Depth Profile - Float ${floatId}`
+                                }
+                            }
+                        }
+                    };
+                    break;
+                    
+                case 'sal_depth':
+                    chartConfig = {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                                label: 'Salinity (‰)',
+                                data: sampleSalinities.map((sal, i) => ({
+                                    x: sal,
+                                    y: sampleDepths[i]
+                                })),
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Salinity (‰)' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Depth (m)' },
+                                    reverse: true
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `Salinity vs Depth Profile - Float ${floatId}`
+                                }
+                            }
+                        }
+                    };
+                    break;
+                    
+                case 'temp_sal':
+                    chartConfig = {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: 'T-S Relationship',
+                                data: sampleTemps.map((temp, i) => ({
+                                    x: sampleSalinities[i],
+                                    y: temp
+                                })),
+                                backgroundColor: '#10b981',
+                                borderColor: '#059669',
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Salinity (‰)' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Temperature (°C)' }
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `T-S Diagram - Float ${floatId}`
+                                }
+                            }
+                        }
+                    };
+                    break;
+                    
+                case 'time_series':
+                    const dates = [];
+                    const surfaceTemps = [];
+                    for (let i = 0; i < 30; i++) {
+                        const date = new Date();
+                        date.setDate(date.getDate() - i);
+                        dates.unshift(date.toISOString().split('T')[0]);
+                        surfaceTemps.unshift(28.0 + Math.sin(i * 0.15) * 1.2 + (Math.random() - 0.5) * 0.5);
+                    }
+                    
+                    chartConfig = {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [{
+                                label: 'Surface Temperature (°C)',
+                                data: surfaceTemps,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Date' }
+                                },
+                                y: {
+                                    title: { display: true, text: 'Temperature (°C)' }
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `Surface Temperature Time Series - Float ${floatId}`
+                                }
+                            }
+                        }
+                    };
+                    break;
+            }
+
+            currentChart = new Chart(ctx, chartConfig);
+        }
+
+        // Modal event handlers
+        window.onclick = function(event) {
+            const vizModal = document.getElementById('visualizationModal');
+            const profileModal = document.getElementById('profileModal');
+            
+            if (event.target === vizModal) {
+                closeVisualization();
+            }
+            if (event.target === profileModal) {
+                closeProfile();
+            }
+        }
+
+        // Initialize everything when page loads
+        window.onload = function() {
+            initMap();
+        };
+
+        // Add custom tooltip styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .float-tooltip {
+                background: rgba(0, 0, 0, 0.8) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 4px !important;
+                font-size: 12px !important;
+                padding: 8px !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
